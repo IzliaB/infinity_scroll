@@ -1,0 +1,53 @@
+<div class="fixed lg:sticky top-0 bottom-0 w-full sm:w-96 lg:w-10 lg:h-screen lg:shadow-2xl">
+    <div class="flex flex-col w-full sm:w-90 h-full transition-transform duration-400 ease-drawer bg-card"
+        [ngClass]="{'-translate-x-full sm:-translate-x-96 lg:-translate-x-80 shadow': opened, 'translate-x-0': !opened}">
+
+        <!-- Header -->
+        <div class="quick-chat-header flex flex-0 items-center justify-start cursor-pointer" (click)="toggle()">
+            <!-- Toggle -->
+            <ng-container *ngIf="!opened || (opened && !selectedChat)">
+                <div class="flex flex-auto items-center justify-center">
+                    <div class="flex flex-0 items-center justify-center w-10">
+                        <mat-icon class="icon-size-6">list_alt</mat-icon>
+                    </div>
+                    <div class="text-lg font-medium text-secondary">Opciones</div>
+                    <button class="ml-auto mr-4" mat-icon-button>
+                        <mat-icon [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                    </button>
+                </div>
+            </ng-container>
+        </div>
+
+        <!-- Content -->
+        <div class="flex flex-auto border-t overflow-hidden">
+
+            <!-- option list -->
+            <div class="flex-0 w-10 h-full overflow-y-auto overscroll-y-contain sm:overflow-hidden sm:overscroll-auto"
+                fuseScrollbar [fuseScrollbarOptions]="{wheelPropagation: false}">
+                <div class="flex flex-col items-center gap-5 mt-3">
+                    <mat-icon class="text-green-700" (click)="mostrarWhatsapp()">comment</mat-icon>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="flex flex-col flex-auto border-l overflow-hidden bg-gray-50 dark:bg-transparent">
+                <ng-container>
+                    <div class="flex flex-col-reverse overflow-y-auto overscroll-y-contain">
+                        <div class="flex flex-col flex-auto shrink px-3 py-4">
+                            <!--mostra proactive whatsapp-->
+                            <ng-container *ngIf="showProactiveWhatsapp; else noSelectionMessage">
+                                <app-proactive-whatsapp></app-proactive-whatsapp>
+                            </ng-container>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #noSelectionMessage class="flex justify-center items-center mx-auto">
+    <div >
+        <p class="text-gray-500 text-center">Selecciona una opción.</p>
+    </div>
+</ng-template>

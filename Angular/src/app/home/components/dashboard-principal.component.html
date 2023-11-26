@@ -1,0 +1,160 @@
+<div class="w-full mb-8">
+    <div class="sm:flex justify-between items-center w-full sm:bg-gray-100 bg-none px-4 py-3 sm:shadow-md sm:mt-0 mt-5">
+        <section class="sm:border-r-2 sm:pr-5">
+            <button class="flex">
+                <mat-icon>calendar_today</mat-icon>
+                <h2 class="font-bold text-gray-600">Hoy</h2>
+            </button>
+        </section>
+
+        <!--Seccion productos-->
+        <section class="flex sm:mt-0 mt-3 sm:px-0 sm:py-0 sm:bg-transparent sm:shadow-none sm:border-none bg-gray-100 shadow-md py-2 px-2 border rounded-lg sm:w-1/6 w-full">
+            <mat-select class="font-semibold" placeholder="Grupos de productos" disableOptionCentering="true">
+                <mat-option class="font-semibold" *ngFor="let producto of products" [value]="producto.nombre">{{ producto.nombre }}</mat-option>
+              </mat-select>
+        </section>
+
+        <!--Seccion Tickets-->
+        <section class="flex sm:mt-0 mt-3 sm:px-0 sm:py-0 sm:bg-transparent sm:shadow-none sm:border-none bg-gray-100 shadow-md py-2 px-2 border rounded-lg sm:w-1/6 w-full sm:ml-5">
+            <mat-select class="font-semibold" placeholder="Grupos de tickets" disableOptionCentering="true">
+                <mat-option class="font-semibold" *ngFor="let ticket of tickets" [value]="ticket.nombre">{{ ticket.nombre }}</mat-option>
+              </mat-select>
+        </section>
+
+        <!--Seccion Chats-->
+        <section class="flex sm:mt-0 mt-3 sm:px-0 sm:py-0 sm:bg-transparent sm:shadow-none sm:border-none bg-gray-100 shadow-md py-2 px-2 border rounded-lg sm:w-1/6 w-full sm:ml-5">
+            <mat-select class="font-semibold" placeholder="Grupos de chats" disableOptionCentering="true">
+                <mat-option class="font-semibold" *ngFor="let chat of chats" [value]="chat.nombre">{{ chat.nombre }}</mat-option>
+            </mat-select>
+        </section>
+
+        <!--Seccion Llamadas-->
+        <section class="flex sm:mt-0 mt-3 sm:px-0 sm:py-0 sm:bg-transparent sm:shadow-none sm:border-none bg-gray-100 shadow-md py-2 px-2 border rounded-lg sm:w-1/6 w-full sm:ml-5">
+            <mat-select class="font-semibold" placeholder="Grupos de llamadas" disableOptionCentering="true">
+                <mat-option class="font-semibold" *ngFor="let call of llamadas" [value]="call.nombre">{{ call.nombre }}</mat-option>
+            </mat-select>
+        </section>
+
+        <section class="flex sm:mt-0 mt-3 border rounded-lg sm:py-2 sm:px-2 px-2 py-3 yalo-bg-blue-300 font-semibold sm:text-base text-base">
+            <button>Actividades Recientes</button>
+        </section>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 pt-5">
+        <!--Tickets-->
+        <div class="w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <div class="py-3 px-4 bg-slate-200 uppercase font-bold text-gray-700">
+                Tendencias de Tickets
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Abiertos</p>
+                <span class="text-blue-700 font-semibold text-xl">11</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Sin asignar</p>
+                <span class="text-blue-700 font-semibold text-xl">0</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Vencidas</p>
+                <span class="text-blue-700 font-semibold text-xl">1</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Vence hoy</p>
+                <span class="text-blue-700 font-semibold text-xl">0</span>
+            </div>
+        </div>
+
+        <!--Chats-->
+        <div class="w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <div class="py-3 px-4 bg-slate-200 uppercase font-bold text-gray-700">
+                Tendencias de Chats
+            </div>
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Chats sin asignar</p>
+                <span class="text-blue-700 font-semibold text-xl">2</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Asignados y sin responder</p>
+                <span class="text-blue-700 font-semibold text-xl">17</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Chats asignados</p>
+                <span class="text-blue-700 font-semibold text-xl">77</span>
+            </div>
+        </div>
+
+        <!--LLamadas-->
+        <div class="w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <div class="py-3 px-4 bg-slate-200 uppercase font-bold text-gray-700">
+                Tendencias de Llamadas
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Total de llamadas</p>
+                <span class="text-blue-700 font-semibold text-xl">0</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Llamadas salientes</p>
+                <span class="text-blue-700 font-semibold text-xl">0</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Llamadas entrantes perdidas</p>
+                <span class="text-blue-700 font-semibold text-xl">0</span>
+            </div>
+
+            <!--Linea de division-->
+            <div class="px-4">
+                <mat-divider></mat-divider>
+            </div>
+
+            <div class="flex justify-between items-center px-4 py-4">
+                <p class="text-base font-medium">Llamadas salientes perdidas</p>
+                <span class="text-blue-700 font-semibold text-xl">0</span>
+            </div>
+        </div>
+
+    </div>
+</div>

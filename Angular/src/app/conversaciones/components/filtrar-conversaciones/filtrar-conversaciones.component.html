@@ -1,0 +1,57 @@
+<div class="flex flex-col flex-auto overflow-y-auto bg-card dark:bg-default mb-8">
+    <!-- Header -->
+    <div class="flex flex-0 items-center h-18 px-6 border-b bg-gray-50 dark:bg-transparent">
+        <button mat-icon-button (click)="drawer.close()">
+            <mat-icon [svgIcon]="'heroicons_outline:arrow-narrow-left'"></mat-icon>
+        </button>
+        <div class="ml-2 font-semibold">Visualizaciones</div>
+    </div>
+
+    <div class="mt-5 px-3">
+        <!--Busqueda-->
+        <mat-form-field class="w-full" appearance="outline">
+            <mat-icon matPrefix>search</mat-icon>
+            <input type="text" matInput placeholder="Buscar una visualizacion">
+        </mat-form-field>
+
+        <!--Vistas Predeterminadas-->
+        <div class="w-full bg-white border border-gray-200 rounded-lg">
+            <div (click)="toggleContent()" class="flex justify-between items-center py-3 px-4 bg-slate-100">
+                <div class="uppercase font-bold text-gray-700 cursor-pointer text-sm">
+                    Vistas predeterminadas
+                </div>
+                <mat-icon matPrefix>keyboard_arrow_down</mat-icon>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div *ngIf="showContent">
+                <div *ngFor="let vista of vistasPredeterminadas"
+                    class="flex justify-between items-center px-4 py-4 cursor-pointer hover:bg-gray-200">
+                    <p class="text-base font-medium">{{ vista.label }}</p>
+                    <span class="font-semibold">{{ vista.cantidad }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!--Visualizaciones compartidas-->
+        <div class="w-full bg-white border border-gray-200 rounded-lg mt-4">
+            <div (click)="toggleContent2()" class="flex justify-between items-center py-3 px-4 bg-slate-100">
+                <div class="uppercase font-bold text-gray-700 cursor-pointer text-sm">
+                    Visualizaciones compartidas
+                </div>
+                <mat-icon matPrefix>keyboard_arrow_down</mat-icon>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div *ngIf="showContent2">
+                <div *ngFor="let vista of vistasCopartidas"
+                    class="flex justify-between items-center px-4 py-4 cursor-pointer hover:bg-gray-200">
+                    <p class="text-base font-medium">{{ vista.label }}</p>
+                    <span class="font-semibold">{{ vista.cantidad }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

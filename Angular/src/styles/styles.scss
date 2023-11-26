@@ -1,0 +1,42 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Import/write your custom styles here.
+/*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
+/* ----------------------------------------------------------------------------------------------------- */
+
+:root {
+    --blue800: #006fa6;
+    --blue500: #00a0da;
+    --blue300: #52bae1;
+    --blue50: #e3f6ff;
+    --blueDark900: #142c3b;
+    --blueDark600: #42677e;
+    --blueDark50: #e2effc;
+    --error: #ff4a4a;
+    --errorLight: #ffebee;
+    --info: #3f77eb;
+    --infoLight: #e4f3ff;
+    --success: #09cf71;
+    --successLight: #e4f8eb;
+    --warning: #f6d318;
+    --warningLight: #fcf8c0;
+    --gray900: #141414;
+    --gray600: #545454;
+    --gray400: #808080;
+    --gray300: #adadad;
+    --gray200: #e2e2e2;
+    --gray100: #efefef;
+    --gray50: #f6f6f6;
+    --white: #fff;
+}
+
+@import "./color";
+@import "./mat-select";
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+@import "@ctrl/ngx-emoji-mart/picker";
+
+.ngx-gallery-layout {
+    width: 100%;
+    height: 350px; //
+    display: flex;
+    flex-direction: column;
+}

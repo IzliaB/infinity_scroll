@@ -1,0 +1,91 @@
+<div>
+    <h1 class="text-2xl text-center">Proactive Whatsapp</h1>
+
+    <div class="mt-5">
+
+        <form [formGroup]="form" class="space-y-4">
+            <!-- From Number -->
+            <div class="space-y-2">
+                <label for="fromNumber" class="block text-gray-500 font-medium">Número de Origen</label>
+                <section class="w-full bg-white px-4 py-2 border rounded-lg focus-within:border-blue-500"
+                    [ngClass]="{ 'border-red-500': form.get('fromNumber').invalid && form.get('fromNumber').touched }">
+                    <mat-select placeholder="Selecciona un número" disableOptionCentering="true"
+                        formControlName="fromNumber" id="fromNumber">
+                        <mat-option [value]="number">{{number}}</mat-option>
+                    </mat-select>
+                </section>
+                <mat-error *ngIf="form.get('fromNumber').hasError('required') && form.get('fromNumber').touched">
+                    Campo obligatorio.
+                </mat-error>
+            </div>
+
+            <!-- To Number -->
+            <div class="space-y-2">
+                <label for="toNumber" class="block text-gray-500 font-medium">Número de Destino</label>
+                <div class="w-full bg-white px-4 py-2 border rounded-lg focus-within:border-blue-500"
+                    [ngClass]="{ 'border-red-500': form.get('toNumber').invalid && form.get('toNumber').touched }">
+                    <input type="text" placeholder="50497211536" formControlName="toNumber" matInput
+                        [matAutocomplete]="autoNumber" (input)="filterUserNumber($event)">
+                    <mat-autocomplete #autoNumber="matAutocomplete" (optionSelected)="selectedPhoneNumber($event)"
+                        class="w-full">
+                        <mat-option *ngFor="let user of users" [value]="user.phoneNumber">
+                            {{ user.phoneNumber }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </div>
+                <mat-error *ngIf="form.get('toNumber').hasError('required') && form.get('toNumber').touched">
+                    Campo obligatorio.
+                </mat-error>
+            </div>
+
+
+            <!-- Template -->
+            <div class="space-y-2">
+                <label for="message" class="text-gray-500 font-medium">Template</label>
+                <section class="w-full bg-white px-4 py-2 border rounded-lg focus-within:border-blue-500"
+                    [ngClass]="{ 'border-red-500': form.get('message').invalid && form.get('message').touched }">
+                    <mat-select placeholder="Selecciona Template" disableOptionCentering="true"
+                        formControlName="message" id="message">
+                        <mat-option *ngFor="let template of templates"
+                            [value]="template.id">{{template.name}}</mat-option>
+                    </mat-select>
+                </section>
+                <mat-error *ngIf="form.get('message').hasError('required') && form.get('message').touched">
+                    Campo obligatorio.
+                </mat-error>
+            </div>
+
+            <!-- Campo de entrada para el nombre (condicional) -->
+            <div *ngIf="showNameField">
+                <div class="space-y-2">
+                    <label for="name" class="text-gray-500 font-medium">Nombre del destinatario</label>
+                    <section class="w-full bg-white px-4 py-2 border rounded-lg focus-within:border-blue-500"
+                        [ngClass]="{ 'border-red-500': form.get('name').invalid && form.get('name').touched }">
+                        <input type="text" placeholder="Nombre Destinatario" formControlName="name" matInput>
+                    </section>
+                    <mat-error *ngIf="form.get('name').hasError('required') && form.get('name').touched">
+                        Campo obligatorio.
+                    </mat-error>
+                </div>
+
+                <!-- Agregar un campo para el nombre del remitente -->
+                <div class="space-y-2 mt-3">
+                    <label for="senderName" class="block text-gray-500 font-medium">Nombre del remitente</label>
+                    <section class="w-full bg-white px-4 py-2 border rounded-lg focus-within:border-blue-500"
+                        [ngClass]="{ 'border-red-500': form.get('senderName').invalid && form.get('senderName').touched }">
+                        <input type="text" placeholder="Nombre Remitente" formControlName="senderName" matInput>
+                    </section>
+                    <mat-error *ngIf="form.get('senderName').hasError('required') && form.get('senderName').touched">
+                        Campo obligatorio.
+                    </mat-error>
+                </div>
+            </div>
+
+            <div class="fixed bottom-4 w-[18.5rem]">
+                <button [ngClass]="{'bg-slate-500': form.invalid, 'bg-green-600 hover:bg-green-500': form.valid}"
+                    [disabled]="form.invalid" (click)="onSubmit()"
+                    class="w-full text-white p-3 rounded-lg font-medium">ENVIAR</button>
+            </div>
+        </form>
+    </div>
+</div>

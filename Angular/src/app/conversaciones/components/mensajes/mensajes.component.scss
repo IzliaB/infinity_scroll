@@ -1,0 +1,71 @@
+.outer {
+    height: 100%;
+    overflow-y: scroll; 
+}
+
+.inner {
+    display: flex;
+    flex-direction: column;
+    // background: hotpink;
+}
+
+.inner div {
+    // padding: 0.5rem;
+    // border-bottom: 1px solid #000;
+}
+
+
+.grid_img {
+    cursor: pointer;
+}
+
+.lightbox {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .4);
+    backdrop-filter: blur(2rem);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    color: white;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: all .5s ease;
+}
+
+.lightbox.isActive {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.lightbox_btn {
+    width: 3rem;
+    cursor: pointer;
+    transition: all .5s ease;
+}
+
+.lightbox_btn:hover {
+    transform: scale(.9);
+}
+
+.lightbox_btn:active {
+    transform: scale(1.1);
+}
+
+.lightbox_svg {}
+
+.lightbox_img {
+    width: 70%;
+    height: 70vh;
+    box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .4);
+    margin-left: 16%;
+}

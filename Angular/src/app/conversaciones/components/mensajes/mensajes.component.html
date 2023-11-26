@@ -1,0 +1,11 @@
+<!-- <app-loading-spinner  *ngIf="page.loading | async"></app-loading-spinner> -->
+<div style="overflow-y: scroll;" scrollable (scrollPosition)="scrollHandler($event)">
+    <div class="row no-gutters">
+        <div *ngFor="let aviso of pageMessages.data | async"
+            class="col-6 my-1 px-1">
+            <h6 class="font-weight-bold">{{ aviso.content }}</h6>
+        </div>
+    </div>
+</div>
+
+<router-outlet></router-outlet>

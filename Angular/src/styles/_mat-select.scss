@@ -1,0 +1,30 @@
+.mdc-list-item--selected .mdc-list-item__primary-text,
+.mdc-list-item--activated .mdc-list-item__primary-text {
+    color: rgb(128, 128, 128) !important;
+    font-size: 14px !important;
+}
+
+.mat-mdc-select-value {
+    font-family: "Lato", sans-serif !important;
+    font-family: "Roboto", sans-serif !important;
+    font-size: 14px !important;
+}
+.mat-mdc-select-panel {
+    background: gray !important;
+}
+
+.mdc-menu-surface {
+    background-color: white !important;
+}
+
+.mat-mdc-option {
+    font-family: "Lato", sans-serif !important;
+    font-family: "Roboto", sans-serif !important;
+    font-size: 14px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+.mat-mdc-option .mat-pseudo-checkbox-minimal {
+    display: none !important;
+}

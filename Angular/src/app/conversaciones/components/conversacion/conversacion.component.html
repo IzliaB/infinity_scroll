@@ -1,0 +1,112 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+    <div class="flex flex-auto overflow-hidden">
+        <div class="relative flex flex-auto w-full bg-card dark:bg-transparent">
+
+            <mat-drawer-container
+                class="flex-auto h-full"
+                [hasBackdrop]="false">
+
+                <!-- Drawer -->
+                <mat-drawer
+                    class="w-full sm:w-100 lg:border-r lg:shadow-none dark:bg-gray-900"
+                    [autoFocus]="false"
+                    [(opened)]="drawerOpened"
+                    #drawer>
+
+                    <!-- New chat -->
+                    <ng-container *ngIf="drawerComponent === 'new-chat'">
+                        <chat-new-chat [drawer]="drawer"></chat-new-chat>
+                    </ng-container>
+
+                    <!-- Filter chats -->
+                    <ng-container *ngIf="drawerComponent === 'filter'">
+                        <app-filtrar-conversaciones [drawer]="drawer"></app-filtrar-conversaciones>
+                    </ng-container>
+
+                </mat-drawer>
+
+                <!-- Drawer content -->
+                <mat-drawer-content class="flex overflow-hidden">
+
+                    <!-- Chats list -->
+                    <ng-container
+                        *ngIf="usuarioConversacion$ | async as usuarioConversacion; else noChats">
+                        <div
+                            class="relative flex flex-auto flex-col w-full min-w-0 lg:min-w-100 lg:max-w-100 bg-card dark:bg-transparent">
+
+                            <!-- Header -->
+                            <div
+                                class="flex flex-col flex-0 py-[1.46rem] px-8 border-b bg-gray-50 dark:bg-transparent">
+                                <div class="flex items-center">
+                                    <div
+                                        class="flex items-center mr-1 cursor-pointer"
+                                        (click)="openFilter()">
+                                        <mat-icon>reorder</mat-icon>
+                                        <div class="font-medium truncate">Todas
+                                            las conversaciones</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chats -->
+                            <div class="flex-auto overflow-y-auto">
+                                <ng-container
+                                    *ngFor="let conversacion of usuarioConversacion; let i = index">
+                                    <a
+                                        class="z-20 flex items-center py-5 px-8 cursor-pointer border-b"
+                                        (click)="selectConversation(conversacion.customerInfo.customerID, conversacion.lastMessage.lastConversationID)">
+                                        <div
+                                            class="relative flex flex-0 items-center justify-center w-10 h-10">
+                                            <ng-container>
+                                                <div
+                                                    class="flex items-center justify-center w-full h-full rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                                    <mat-icon>person</mat-icon>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                                        <div class="min-w-0 ml-4">
+                                            <div
+                                                class="font-medium leading-5 truncate">{{conversacion.customerInfo.displayName}}</div>
+                                            <div
+                                                class="leading-5 truncate text-secondary">{{conversacion.lastMessage.content}}
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="flex flex-col items-end self-start ml-auto pl-2">
+                                            <div
+                                                class="text-sm leading-5 text-secondary">{{
+                                                formatFecha(conversacion.date)
+                                                }}</div>
+                                        </div>
+                                    </a>
+                                </ng-container>
+                            </div>
+
+                        </div>
+
+                    </ng-container>
+
+                    <!-- No chats template -->
+                    <ng-template #noChats>
+                        <div
+                            class="flex flex-auto flex-col items-center justify-center h-full w-128">
+                            <mat-icon class="icon-size-24">chat</mat-icon>
+                            <div
+                                class="mt-4 text-2xl font-semibold tracking-tight text-secondary">No
+                                chats</div>
+                        </div>
+                    </ng-template>
+
+                    <!-- Conversation -->
+                    <div
+                        class="flex-auto w-full h-full border-l z-20 absolute inset-0 lg:static lg:inset-auto flex">
+                        <router-outlet></router-outlet>
+                    </div>
+
+                </mat-drawer-content>
+
+            </mat-drawer-container>
+
+        </div>
+    </div>
+</div>
