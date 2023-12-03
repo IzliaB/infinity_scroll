@@ -1,11 +1,292 @@
-<!-- <app-loading-spinner  *ngIf="page.loading | async"></app-loading-spinner> -->
-<div style="overflow-y: scroll;" scrollable (scrollPosition)="scrollHandler($event)">
-    <div class="row no-gutters">
-        <div *ngFor="let aviso of pageMessages.data | async"
-            class="col-6 my-1 px-1">
-            <h6 class="font-weight-bold">{{ aviso.content }}</h6>
-        </div>
-    </div>
-</div>
+<div
+    class="flex flex-col flex-auto overflow-y-auto lg:overflow-hidden bg-card dark:bg-default">
+    <ng-container *ngIf="customerID; else noChats">
+        <mat-drawer-container class="flex-auto h-full" [hasBackdrop]="false">
+            <!-- Drawer -->
+            <mat-drawer
+                class="w-full sm:w-100 lg:border-l lg:shadow-none dark:bg-gray-900"
+                [autoFocus]="false"
+                [mode]="drawerMode" [position]="'end'" [(opened)]="drawerOpened"
+                #drawer>
+                <!-- Contact info -->
+                <div>Chat Contact</div>
+            </mat-drawer>
+            <!-- Drawer content -->
+            <mat-drawer-content class="flex flex-col overflow-hidden">
+                <!-- Header -->
+                <div
+                    class="flex flex-0 items-center h-18 px-4 md:px-6 border-b bg-gray-50 dark:bg-transparent">
+                    <!-- Back button -->
+                    <a class="lg:hidden md:-ml-2" mat-icon-button
+                        [routerLink]="['./']" (click)="resetChat()">
+                        <mat-icon
+                            [svgIcon]="'heroicons_outline:arrow-narrow-left'"></mat-icon>
+                    </a>
 
-<router-outlet></router-outlet>
+                    <ng-container>
+                        <!-- Contact info -->
+                        <div
+                            class="flex items-center ml-2 lg:ml-0 mr-2 cursor-pointer"
+                            (click)="openContactInfo()">
+                            <div
+                                class="relative flex flex-0 items-center justify-center w-10 h-10">
+                                <ng-container>
+                                    <div
+                                        class="flex items-center justify-center w-full h-full rounded-full text-lg uppercase bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                        <mat-icon>person</mat-icon>
+                                    </div>
+                                </ng-container>
+                            </div>
+                            <div
+                                class="ml-4 text-lg font-medium leading-5 truncate">
+                                {{clientes?.fullName !== null ?
+                                clientes?.fullName : clientes?.phoneNumber}}
+                            </div>
+                        </div>
+
+                        <button class="ml-auto" mat-icon-button
+                            [matMenuTriggerFor]="conversationHeaderMenu">
+                            <mat-icon
+                                [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+                            <mat-menu #conversationHeaderMenu>
+                                <button mat-menu-item
+                                    (click)="openContactInfo()">
+                                    <mat-icon
+                                        [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+                                    Informacion de Contacto
+                                </button>
+                                <button mat-menu-item>
+                                    <mat-icon
+                                        [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                                    Seleccionar mensajes
+                                </button>
+                                <button mat-menu-item
+                                    (click)="toggleMuteNotifications()">
+                                    <mat-icon
+                                        [svgIcon]="'heroicons_outline:volume-up'"></mat-icon>
+                                    Silenciar notificaciones
+                                </button>
+                                <button mat-menu-item>
+                                    <mat-icon
+                                        [svgIcon]="'heroicons_outline:backspace'"></mat-icon>
+                                    Limpiar mensajes
+                                </button>
+                                <button mat-menu-item>
+                                    <mat-icon
+                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    Borrar Chat
+                                </button>
+                            </mat-menu>
+                        </button>
+
+                        <!--Botn Resolver-->
+                        <button
+                            class="border rounded-lg sm:py-2 sm:px-3 bg-slate-200 px-2 py-3 font-semibold sm:text-base text-base"
+                            [matMenuTriggerFor]="resolverMenu">
+                            Resolver
+                            <mat-menu #resolverMenu>
+                                <button mat-menu-item>
+                                    Resolver
+                                </button>
+                                <button mat-menu-item>
+                                    Resolver y crear ticket en freshdesk
+                                </button>
+                            </mat-menu>
+                        </button>
+                    </ng-container>
+                </div>
+
+                <!-- End Header -->
+
+                <!-- Conversation -->
+                <div
+                    class="flex overflow-y-auto flex-col-reverse h-screen"
+                    style="background: #fff !important;"
+                    infiniteScroll
+                    [infiniteScrollDistance]="2"
+                    [infiniteScrollThrottle]="50"
+                    (scrolledUp)="onScrollUp()"
+                    [scrollWindow]="false">
+                    <div
+                        class="flex flex-col flex-auto flex-shrink p-6 bg-card dark:bg-transparent">
+                        <div
+                            *ngFor="let message of messagesService.allMessage; let i = index; trackBy: trackByIdx">
+                            <div class="flex flex-col items-end mt-0.5">
+                                <!-- Bubble -->
+                                <div
+                                    class="relative max-w-3/4 px-3 py-2 rounded-lg bg-blue-500 text-blue-50">
+                                    <!-- Speech bubble tail -->
+                                    <ng-container>
+                                        <div
+                                            class="absolute bottom-0 w-3 transform text-blue-500 -right-1 -mr-px mb-px">
+                                            <ng-container
+                                                *ngTemplateOutlet="speechBubbleExtension"></ng-container>
+                                        </div>
+                                    </ng-container>
+                                    <!-- Message -->
+                                    <h2>{{ i }}</h2>
+                                    <div class="min-w-4 leading-5"
+                                        [innerHTML]="message.content"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message field -->
+                <div class="flex items-end px-4 py-0.5">
+                    <div class="w-full flex items-center">
+                        <div class="w-full">
+                            <div class="mb-1 font-medium mt-1">
+                                <button (click)="mostrarResponderInput()"
+                                    [ngClass]="{'text-blue-700': isResponderActive}"
+                                    class="px-2 hover:text-blue-700">Responder</button>
+                                <button (click)="mostrarNotaPrivadaInput()"
+                                    [ngClass]="{'text-blue-700': isNotaPrivadaActive}"
+                                    class="px-2 hover:text-blue-700">Nota
+                                    Privada</button>
+                            </div>
+
+                            <div>
+                                <!-- Para archivos PDF -->
+                                <input #pdfFileInput type="file"
+                                    style="display: none;"
+                                    (change)="handlePDFInput($event)" />
+
+                                <!-- Para imágenes -->
+                                <input #imageFileInput type="file"
+                                    style="display: none;"
+                                    (change)="handleImageInput($event)" />
+
+                                <!-- Div para mostrar el nombre del archivo PDF -->
+                                <div *ngIf="selectedFileType === 'document'"
+                                    class="my-2 text-gray-600 border rounded-lg bg-slate-200 inline-flex items-center">
+                                    <div class="py-2 pl-2 flex">
+                                        <mat-icon>description</mat-icon>
+                                        {{ selectedPDF.name }}
+                                    </div>
+                                    <mat-icon
+                                        class="relative bottom-2 cursor-pointer text-md"
+                                        (click)="clearSelectedFile()">clear</mat-icon>
+                                </div>
+
+                                <!-- Div para mostrar el nombre del archivo de imagen -->
+                                <div *ngIf="selectedFileType === 'image'"
+                                    class="my-2 text-gray-600 border rounded-lg bg-slate-200 inline-flex items-center">
+
+                                    <div class="py-2 pl-2 flex">
+                                        <mat-icon>image</mat-icon>
+                                        {{ selectedImage.name }}
+                                    </div>
+                                    <mat-icon
+                                        class="relative bottom-2 cursor-pointer text-md"
+                                        (click)="clearSelectedFile()">clear</mat-icon>
+                                </div>
+
+                                <!-- Mensaje de aviso si es text-area esta vacio -->
+                                <div
+                                    *ngIf="isResponderInputVisible && showEmptyMessageWarning"
+                                    class="text-red-500">
+                                    Por favor, escribe un mensaje para
+                                    continuar.
+                                </div>
+
+                                <textarea *ngIf="isResponderInputVisible"
+                                    class="w-full py-2.5 px-4 my-0 border outline-none rounded-lg bg-white break-words resize-none"
+                                    matInput #messageInput
+                                    [(ngModel)]="messageContent"
+                                    placeholder="mensaje"
+                                    rows="1"
+                                    (keydown.enter)="onEnterKey($event, lastConversation, clientes?.phoneNumber, message.ticketID)">
+                                </textarea>
+                                <!-- Segundo input asociado al botón "Nota Privada" -->
+                                <input *ngIf="isNotaPrivadaInputVisible"
+                                    type="text"
+                                    class="w-full py-2.5 px-4 my-0 border outline-none rounded-lg bg-white break-words"
+                                    matInput placeholder="mensaje privado" />
+
+                                <div
+                                    class="mt-5 flex items-center justify-between">
+                                    <div class="flex gap-x-1">
+                                        <!-- archivos -->
+                                        <mat-icon matSuffix
+                                            [svgIcon]="'heroicons_outline:paper-clip'"
+                                            class="top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                            title="Adjuntar"
+                                            (click)="openPDFSelector()"></mat-icon>
+
+                                        <!-- imagenes -->
+                                        <mat-icon matSuffix
+                                            class="top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                            title="Imagen"
+                                            (click)="openImageSelector()">image</mat-icon>
+
+                                        <!-- emogis -->
+                                        <mat-icon matPrefix
+                                            [svgIcon]="'heroicons_outline:emoji-happy'"
+                                            class="top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                            title="Emoji"
+                                            (click)="toggleEmojiPicker()"></mat-icon>
+
+                                        <!-- Respuestas predefinidas -->
+                                        <mat-icon matSuffix
+                                            class="top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                            title="Respuesta predefinida">description</mat-icon>
+
+                                        <!-- pregunstas fecuentes -->
+                                        <mat-icon matSuffix
+                                            class="top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                            title="Pregunstas Frecuentes">question_answer</mat-icon>
+                                    </div>
+
+                                    <mat-icon
+                                        class="rotate-90 top-1/2 transform -translate-y-1/2 right-3 cursor-pointer"
+                                        (click)="sendMultimedia(lastConversation, messageContent, clientes?.phoneNumber, clientes?.uid)"
+                                        [svgIcon]="'heroicons_outline:paper-airplane'"></mat-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Message field -->
+
+            </mat-drawer-content>
+        </mat-drawer-container>
+        <!-- emojis -->
+        <emoji-mart class="emoji-mart" set="{{ set }}" *ngIf="showEmojiPicker"
+            (emojiSelect)="addEmoji($event)"></emoji-mart>
+    </ng-container>
+
+    <!-- No chats template -->
+    <ng-template #noChats>
+        <div class="flex flex-auto flex-col items-center justify-center h-full">
+            <mat-icon class="icon-size-24" [svgIcon]="'iconsmind:speach_bubble'"></mat-icon>
+            <div
+                class="mt-4 text-2xl font-semibold tracking-tight text-secondary">
+                No chats
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- Conversation -->
+    <div
+        class="flex-auto border-l z-20 absolute inset-0 lg:static lg:inset-auto flex">
+        <router-outlet></router-outlet>
+    </div>
+
+    <!-- Speech bubble tail SVG -->
+    <!-- @formatter:off -->
+    <ng-template #speechBubbleExtension>
+        <svg width="100%" height="100%" viewBox="0 0 66 66"
+            xmlns="http://www.w3.org/2000/svg">
+            <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                fill-rule="evenodd">
+                <path
+                    d="M1.01522827,0.516204834 C-8.83532715,54.3062744 61.7609863,70.5215302 64.8009949,64.3061218 C68.8074951,54.8859711 30.1663208,52.9997559 37.5036011,0.516204834 L1.01522827,0.516204834 Z"
+                    fill="currentColor" fill-rule="nonzero"></path>
+            </g>
+        </svg>
+    </ng-template>
+    <!-- @formatter:on -->
+</div>

@@ -11,13 +11,13 @@ import { LayoutComponent } from 'app/layout/layout.component';
 import { appConfig } from './fuse-config/app.config';
 import { FuseSharedModule } from '@fuse/shared.module';
 import { FuseMockApiModule } from '@fuse/lib/mock-api';
-import { AngularFireModule, FIREBASE_APP_NAME, FIREBASE_OPTIONS } from '@angular/fire/compat';
 import { environment } from 'environments/enviroment.qa';
-import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
-import { IAbcDataAccessConfig } from './shared/interfaces/firebase-config.interface';
 import { mockApiServices } from './shared/common';
-import { MatSelectModule } from '@angular/material/select'; // Importa MatSelectModule
-
+import { MatSelectModule } from '@angular/material/select';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { FIREBASE_OPTIONS } from '@angular/fire/compat';
+// import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 const routerConfig: ExtraOptions = {
     preloadingStrategy: PreloadAllModules,
@@ -61,29 +61,19 @@ export const appRoutes: Route[] = [
         FuseConfigModule.forRoot(appConfig),
         FuseMockApiModule.forRoot(mockApiServices),
         FuseSharedModule,
-        // FuseLoadingBarModule,
 
         LayoutModule,
         SharedModule,
-        // TranslateModule.forRoot()
-        AngularFireModule.initializeApp(environment.dataAccessConfig),
-        AngularFirestoreModule.enablePersistence(),
-        MatSelectModule
+        MatSelectModule,
+        // provideFirebaseApp(() => initializeApp(firebaseConfig)
+        provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+        provideFirestore(() => getFirestore())
     ],
+    providers: [{provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig}],
     bootstrap: [
         AppComponent
     ]
 })
 export class AppModule {
-    static forRoot(
-        config: IAbcDataAccessConfig
-    ): ModuleWithProviders<AppModule> {
-        return {
-            ngModule: AppModule,
-            providers: [
-                { provide: FIREBASE_APP_NAME, useValue: config.appName },
-                { provide: FIREBASE_OPTIONS, useValue: config.firebaseConfig }
-            ]
-        }
-    }
 }
+// platformBrowserDynamic().bootstrapModule(AppModule);

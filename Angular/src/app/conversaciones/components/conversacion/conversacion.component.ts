@@ -1,16 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { Observable, Subject, map, takeUntil } from 'rxjs';
-import { ConversacionesService } from '../../services/conversacion.service';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 import { Router } from '@angular/router';
-import { SelectedConversationService } from 'app/conversaciones/services/seleccionarconversacion.service';
-import { UsuarioConversacionesService } from 'app/conversaciones/services/usuarioConversaciones.service';
 import { UsuarioConversaciones } from 'app/conversaciones/models/usuarioConversaciones';
+import { Unsubscribe, collection, Firestore, onSnapshot, query, orderBy } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-conversacion',
   templateUrl: './conversacion.component.html',
   styleUrls: ['./conversacion.component.scss'],
-  encapsulation  : ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConversacionComponent implements OnInit, OnDestroy {
@@ -23,7 +21,7 @@ export class ConversacionComponent implements OnInit, OnDestroy {
 
   private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-  conversations: any;
+  conversations: UsuarioConversaciones[] = [];
   conversationsByClient: { [clienteID: string]: any[] } = {}; // Inicializar como objeto vacío
 
   conversationsByClientArray: any[] = [];
@@ -35,21 +33,41 @@ export class ConversacionComponent implements OnInit, OnDestroy {
 
   hasConversations: boolean = false;
 
+  private _unsubscribe: Unsubscribe;
+  private readonly firestore: Firestore = inject(Firestore);
 
   constructor(
-    private _chatService: ConversacionesService,
     private _changeDetectorRef: ChangeDetectorRef,
-    private selectedConversationService: SelectedConversationService,
     private router: Router,
-    private usuarioConversaciones: UsuarioConversacionesService
   ) {
   }
 
   ngOnInit(): void {
-    this.usuarioConversacion$ = this.usuarioConversaciones.userConversations$;
+    this.getUserConversations();
   }
 
+
+  getUserConversations() {
+    const querySnapshot = query(collection(this.firestore, 'userConversations'), orderBy('date', 'desc'));
+    this._unsubscribe = onSnapshot(querySnapshot, (snap) => {
+      const data = snap.docs.map(u => {
+        const userConversation = u.data() as any;
+        const id = u.id;
+        return { id, ...userConversation } as UsuarioConversaciones;
+      });
+      this.conversations = data;
+      // console.log('this.conversations', this.conversations);
+      this._changeDetectorRef.markForCheck();
+    }, (err) => {
+      console.log('err userConversations', err);
+    });
+  }
+
+
   ngOnDestroy(): void {
+    if (this._unsubscribe) {
+      this._unsubscribe(); // Desuscribirse del snapshot cuando el componente se destruye.
+    }
     this._unsubscribeAll.next(null);
     this._unsubscribeAll.complete();
   }
@@ -89,18 +107,56 @@ export class ConversacionComponent implements OnInit, OnDestroy {
     return Object.keys(conversations);
   }
 
+  getWhoIsMessage(conversacion: UsuarioConversaciones) {
+    if (conversacion.lastMessage.isMessageCustomer === true) {
+      const contentText = `Usted: ${conversacion.lastMessage.content}`
+      const contentImg = `Usted: Ha enviado una imagen`;
+      const contentFile = `Usted: Ha enviado un archivo`;
+      const contentVideo = `Usted: Ha enviado un video`;
+      const contentAudio = `Usted: Ha enviado un audio`;
+
+      if (conversacion.lastMessage.type === "text") {
+        return contentText;
+      }
+
+      if (conversacion.lastMessage.type === "document") {
+        return contentFile;
+      }
+
+      if (conversacion.lastMessage.type === "image") {
+        return contentImg;
+      }
+    } else {
+      const contentText = conversacion.lastMessage.content
+      const contentImg = `Ha enviado una imagen`;
+      const contentFile = `Ha enviado un archivo`;
+      const contentVideo = `Ha enviado un video`;
+      const contentAudio = `Ha enviado un audio`;
+
+      if (conversacion.lastMessage.type === "text") {
+        return contentText;
+      }
+
+      if (conversacion.lastMessage.type === "document") {
+        return contentFile;
+      }
+
+      if (conversacion.lastMessage.type === "image") {
+        return contentImg;
+      }
+    }
+  }
+
   getObjectKeys(obj: any): string[] {
     return Object.keys(obj);
   }
 
-  filterChats(query: string): void
-  {
-      // Reset the filter
-      if ( !query )
-      {
-          this.filteredChats = this.chats;
-          return;
-      }
+  filterChats(query: string): void {
+    // Reset the filter
+    if (!query) {
+      this.filteredChats = this.chats;
+      return;
+    }
   }
 
 

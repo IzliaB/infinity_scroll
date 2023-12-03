@@ -5,14 +5,17 @@ import {
     Component,
     ElementRef,
     HostListener,
+    NgZone,
     OnInit,
     ViewChild,
     ViewEncapsulation,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { ConversacionesService } from 'app/conversaciones/services/conversacion.service';
-import { Observable, Subject, concat, debounceTime, map, of, switchMap, take, takeUntil, tap } from 'rxjs';
+import { SelectedConversationService } from 'app/conversaciones/services/seleccionarconversacion.service';
+import { Observable, Subject, throttleTime, map, switchMap, takeUntil, Subscription, BehaviorSubject, mergeMap, scan } from 'rxjs';
 import Swal from 'sweetalert2';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,32 +24,35 @@ import {
     BodyMessage,
     TypeMessage,
 } from 'app/conversaciones/conversations.types';
-import { ScrollService } from 'app/conversaciones/services/scrollService.service';
-import { PaginationService } from 'app/conversaciones/services/messages.service';
+import { ConversationMessagesInterface, Message } from 'app/conversaciones/models/conversaciones';
+import { MessagesService } from 'app/conversaciones/services/messages.service';
+import { ClienteInterface } from 'app/conversaciones/models/clientes';
+import { CustomerConversationService } from 'app/conversaciones/services/customerConversations.service';
+import { Unsubscribe, collection, Firestore, onSnapshot, query, orderBy, where, limit, startAfter, DocumentData, onSnapshotsInSync, Query, collectionChanges } from '@angular/fire/firestore';
+
 @Component({
     selector: 'app-mensajes',
     templateUrl: './mensajes.component.html',
     styleUrls: ['./mensajes.component.scss'],
-    encapsulation: ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    // encapsulation: ViewEncapsulation.None,
+    // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MensajesComponent implements OnInit {
-    isConversationSelected = false;
+
     customerID: string = '';
+    lastConversation: string = '';
 
     @ViewChild('messageInput') messageInput: ElementRef;
     @ViewChild('pdfFileInput') pdfFileInput: ElementRef | undefined;
     @ViewChild('imageFileInput') imageFileInput: ElementRef | undefined;
+
     chat: any;
     drawerMode: 'over' | 'side' = 'side';
     drawerOpened: boolean = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     messageContent: string = ''; // Propiedad para el contenido del mensaje
-    conversations$: Observable<any[]>;
 
-    // lightboxActiveState: boolean[] = [];
     lightboxActiveState: { [messageId: string]: boolean } = {};
-
     isResponderInputVisible = true;
     isNotaPrivadaInputVisible = false;
     isResponderActive = true;
@@ -60,37 +66,51 @@ export class MensajesComponent implements OnInit {
     fileSelected: File;
     fileSelectedDocument: File;
     showEmptyMessageWarning = false;
+    clientes!: ClienteInterface;
 
-    @ViewChild('scrollContainer') scrollContainer: ElementRef;
+    messages: any[] = [];
+    essages$!: Observable<any[]>
 
-    pageSize = 3; // Número de mensajes por página
-    messages = [];
-    loading = false;
-    lastVisible = null; // Último mensaje visible para paginación
+    list: any
+    theEnd = false;
+
+    offset = new BehaviorSubject(null);
+    page = 1;
+    isLoading: boolean = false;
+    observer!: IntersectionObserver
 
     constructor(
         private route: ActivatedRoute,
-        private _changeDetectorRef: ChangeDetectorRef,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _chatService: ConversacionesService,
         private datePipe: DatePipe,
         private sanitizer: DomSanitizer,
         public dialog: MatDialog,
-        private scrollService: ScrollService,
-        public pageMessages: PaginationService
+        public pageMessages: MessagesService,
+        public messagesService: CustomerConversationService,
+        private _changeDetectorRef: ChangeDetectorRef,
+
     ) { }
 
     @HostListener('input')
     @HostListener('ngModelChange')
+    @HostListener('scroll', ['$event'])
 
     ngOnInit(): void {
-
         this.customerID = this.route.snapshot.paramMap.get('id');
 
-        this.getAvisosTest();
-
-
-        this._changeDetectorRef.markForCheck();
+        this.messagesService.getNewMessages(this.customerID).subscribe(res => {
+            // console.log(res.slice().reverse());
+            if (res.length === 0) {
+                this.theEnd = true;
+            }
+            res = res.sort((a, b) => {
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateA - dateB;
+            })
+            this._changeDetectorRef.markForCheck()
+        });
 
         this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -100,69 +120,37 @@ export class MensajesComponent implements OnInit {
                 } else {
                     this.drawerMode = 'over';
                 }
-
-                this._changeDetectorRef.markForCheck();
             });
     }
 
-
-
-    getAvisosTest() {
-        console.log('Calling getAvisosTest with customerID:', this.customerID);
-        this.pageMessages.init(this.customerID, {
-            reverse: false,
-            prepend: false,
+    onScrollUp() {
+        console.log('scrolled up!');
+        this.messagesService.changeStatePaginated({ groupMessageIndex: this.page++ })
+        this.messagesService.getPageMessages(this.customerID, this.page).subscribe(res => {
+            res = res.sort((a, b) => {
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateA - dateB;
+            })
+            this._changeDetectorRef.markForCheck()
         });
+        console.log('this.page', this.page);
+    }
+
+    nextBatch() {
+        // this.messagesService.changeState({ groupMessageIndex: 2 });
     }
 
 
-
-    scrollHandler(e) {
-        // if (e === 'bottom') {
-        //   this.page.more()
-        // }
-
-        if (e === 'top') {
-            this.pageMessages.more(this.customerID);
-        }
+    trackByIdx(i) {
+        return i;
     }
 
-
-
-
-
-    loadMoreMessages(): void {
-        if (this.lastVisible) {
-            this.loading = true;
-            this._chatService
-                .getConversationxMessages(this.customerID, this.pageSize, this.lastVisible)
-                .pipe(takeUntil(this._unsubscribeAll))
-                .subscribe(({ messages, hasMore }) => {
-                    if (hasMore) {
-                        // Use a temporary array to prevent overwriting the existing messages
-                        const tempMessages = [...this.messages, ...messages];
-                        this.lastVisible = messages[messages.length - 1].createdAt;
-
-                        // Update the conversations$ observable (if needed)
-                        // This might be optional based on your use case
-                        this.conversations$ = of(tempMessages);
-
-                        // Delay the update to reduce the visual flickering
-                        setTimeout(() => {
-                            this.messages = tempMessages;
-                            this.loading = false;
-                            this._changeDetectorRef.markForCheck();
-                        }, 300);
-                    } else {
-                        // No more messages to load
-                        this.loading = false;
-                    }
-                });
-        }
+    refreshMessage() {
+        // this.messagesService.changeState({ groupMessageIndex: 2 })
     }
 
     openImageInGallery(imageUrl: any) {
-        // console.log('imageUrl', imageUrl.changingThisBreaksApplicationSecurity.toString());
         this.dialog.open(SeleccionarImagenMensajeComponent, {
             width: '100%',
             data: { imageUrl: imageUrl },
@@ -178,7 +166,7 @@ export class MensajesComponent implements OnInit {
 
         this.lightboxActiveState[messageId] =
             !this.lightboxActiveState[messageId];
-        this.imgIndex = messageId; // Ajusta esto según tus necesidades
+        this.imgIndex = messageId;
 
         console.log(
             'lightboxActiveState después de la actualización:',
@@ -216,7 +204,7 @@ export class MensajesComponent implements OnInit {
 
     openContactInfo(): void {
         this.drawerOpened = true;
-        this._changeDetectorRef.markForCheck();
+        // this._changeDetectorRef.markForCheck();
     }
 
     sendText(conversationId, context, phoneNumber, ticketID) {
@@ -490,7 +478,7 @@ export class MensajesComponent implements OnInit {
         }
 
         // Forzar la detección de cambios después de limpiar el archivo
-        this._changeDetectorRef.detectChanges();
+        // this._changeDetectorRef.detectChanges();
     }
 
 

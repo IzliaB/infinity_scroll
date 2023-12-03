@@ -1,5 +1,5 @@
 export const environment = {
-    dataAccessConfig: {
+    firebaseConfig: {
         projectId: 'yalo-atiendo-services-dev',
         appId: '1:460012376428:web:9a81ca65f82be49e2be349',
         storageBucket: 'yalo-atiendo-services-dev.appspot.com',

@@ -13,16 +13,15 @@ export class ScrollableDirective {
   onScroll(event) {
     try {
 
-      const top = event.target.scrollTop
+      let top = event.target.scrollTop
       const height = this.el.nativeElement.scrollHeight
       const offset = this.el.nativeElement.offsetHeight
 
-
-      if (top > height - offset - 1) {
+      if (top === 0) {
         this.scrollPosition.emit('bottom')
       }
 
-      if (top === 0) {
+      if (offset - height === top) {
         this.scrollPosition.emit('top')
       }
 

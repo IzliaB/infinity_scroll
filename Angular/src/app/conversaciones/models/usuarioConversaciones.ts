@@ -1,4 +1,5 @@
 export interface UsuarioConversaciones {
+    id?: string,
     customerInfo: CustomerInfo,
     date: CreatedAt,
     lastMessage: LastMessageInfo,
@@ -22,4 +23,5 @@ export interface LastMessageInfo {
     lastConversationID: string;
     lastMessageID: string;
     type: string
+    isMessageCustomer: boolean
 }

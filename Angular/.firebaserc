@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "yalo-atiendo-services-dev"
+  },
+  "targets": {
+    "yalo-atiendo-services-dev": {
+      "hosting": {
+        "fuse": [
+          "yalo-atiendo-services-dev"
+        ]
+      }
+    }
   }
 }

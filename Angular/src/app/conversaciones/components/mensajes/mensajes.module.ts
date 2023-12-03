@@ -20,10 +20,7 @@ import { MensajesComponent } from './mensajes.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SharedModule } from 'app/shared/shared.module';
 import { NgxGalleryModule } from '@kolkov/ngx-gallery';
-import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { InfiniteScrollModule } from "ngx-infinite-scroll";
-import { PaginationService } from 'app/conversaciones/services/messages.service';
-// import { ScrollableDirective } from 'app/shared/directive/scrollable.directive';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 @NgModule({
     declarations: [],
@@ -45,7 +42,7 @@ import { PaginationService } from 'app/conversaciones/services/messages.service'
         FormsModule,
         MatAutocompleteModule,
         MatDividerModule,
-
+        // InfiniteScrollModule,
         NgxGalleryModule,
 
         MatCheckboxModule,

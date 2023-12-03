@@ -24,13 +24,14 @@ import { MensajesModule } from '../mensajes/mensajes.module';
 import { MensajesComponent } from '../mensajes/mensajes.component';
 import { FiltrarConversacionesComponent } from '../filtrar-conversaciones/filtrar-conversaciones.component';
 import { MatSelectModule } from '@angular/material/select';
+// import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
+// import { IntersectionListenerDirective } from 'app/shared/directive/scrollable.directive';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+// import { ScrollingModule } from '@angular/cdk/scrolling';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import { ScrollableDirective } from 'app/shared/directive/scrollable.directive';
-import { PaginationService } from 'app/conversaciones/services/messages.service';
 
 @NgModule({
-    declarations: [ConversacionComponent, MensajesComponent, FiltrarConversacionesComponent, ScrollableDirective],
+    declarations: [ConversacionComponent, MensajesComponent, FiltrarConversacionesComponent],
     imports: [
 
         MatButtonModule,
@@ -39,7 +40,7 @@ import { PaginationService } from 'app/conversaciones/services/messages.service'
         MatIconModule,
         MatInputModule,
         MatListModule,
-        InfiniteScrollModule,
+        MatProgressSpinnerModule,
         // HotToastModule.forRoot(),
         MatMenuModule,
         MatRadioModule,
@@ -49,7 +50,9 @@ import { PaginationService } from 'app/conversaciones/services/messages.service'
         FormsModule,
         MatAutocompleteModule,
         MatDividerModule,
+        // ScrollingModule,
         MatSelectModule,
+        InfiniteScrollModule,
         FuseSharedModule,
 
         MatCheckboxModule,

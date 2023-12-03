@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/compat/firestore';
-import { BehaviorSubject, combineLatest, filter, forkJoin, map, mergeMap, Observable, of, switchMap, take, tap, throwError, Subject, catchError, scan } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, of, switchMap, take, tap, catchError } from 'rxjs';
 
 
 // Options to reproduce firestore queries consistently
@@ -15,12 +15,13 @@ interface QueryConfig {
 @Injectable({
     providedIn: 'root'
 })
-export class PaginationService {
+export class MessagesService {
 
     // Source data
     private _done = new BehaviorSubject(false);
     private _loading = new BehaviorSubject(false);
     private _data = new BehaviorSubject([]);
+    private _state = new BehaviorSubject<'loading' | 'complete' | 'error'>('complete'); // Added state
 
     private query: QueryConfig;
 
@@ -28,15 +29,21 @@ export class PaginationService {
     data: Observable<any>;
     done: Observable<boolean> = this._done.asObservable();
     loading: Observable<boolean> = this._loading.asObservable();
+    state: Observable<'loading' | 'complete' | 'error'> = this._state.asObservable();
+
 
     constructor(private afs: AngularFirestore) { }
+
+    getAllMessageByCustomerId(customerId: string, index: number) {
+        return this.afs.collection('messages', (ref) => ref.where("customerID", "==", customerId).orderBy("createdAt").limit(10)).valueChanges() as Observable<any>;
+    }
 
     // Initial query sets options and defines the Observable
     init(clienteID: string, opts?) {
         this.query = {
             path: 'conversations',
             field: 'createdAt',
-            limit: 2,
+            limit: 10,
             reverse: false,
             prepend: false,
             ...opts
@@ -49,14 +56,14 @@ export class PaginationService {
                 .limit(this.query.limit);
         });
     
-        console.log('Firestore Query:', first);
+        // console.log('Firestore Query:', first);
     
         this.mapAndUpdate(first);
     
         this.data = this._data.asObservable().pipe(
             switchMap((conversations: any) => {
                 const messagesObservables = conversations.map(conversation => {
-                    console.log('conversation', conversation);
+                    // console.log('conversation', conversation);
                     const messagesCollection = this.afs.collection(`conversations/${conversation.uid}/messages`);
                     return messagesCollection.valueChanges().pipe(
                         catchError(error => {
@@ -69,12 +76,18 @@ export class PaginationService {
                 return combineLatest(messagesObservables);
             }),
             tap((messagesArrays: any) => {
-                console.log('Messages Arrays:', messagesArrays);
+                // console.log('Messages Arrays:', messagesArrays);
             }),
             map((messagesArrays: any) => {
-                const flattenedMessages = messagesArrays.flat();
-                console.log('Flattened Messages:', flattenedMessages);
-                return flattenedMessages;
+                const flattenedMessages = messagesArrays.flat().map(message => ({
+                    ...message,
+                    createdAt: this.formatDate(message.createdAt)
+                }));
+                // console.log('Flattened Messages (unsorted):', flattenedMessages);
+                const sortedMessages = flattenedMessages.sort((a, b) => a.createdAt - b.createdAt);
+
+                console.log('Sorted Messages:', sortedMessages);
+                return sortedMessages;
             }),
             catchError(error => {
                 console.error('Error combining messages:', error);
@@ -83,12 +96,13 @@ export class PaginationService {
         );
         
     }
-    
 
     // Retrieves additional data from firestore
     more(clienteID) {
-        console.log('Calling more function with clienteID:', clienteID);
+        // console.log('Calling more function with clienteID:', clienteID);
         const cursor = this.getCursor();
+
+        // console.log('cursor', cursor);
 
         const more = this.afs.collection(this.query.path, ref => {
             return ref
@@ -98,7 +112,7 @@ export class PaginationService {
                 .startAfter(cursor);
         });
 
-        console.log('Firestore More Query:', more);
+        // console.log('Firestore More Query:', more);
 
         this.mapAndUpdate(more);
     }
@@ -121,6 +135,8 @@ export class PaginationService {
     
         // loading
         this._loading.next(true);
+
+        this._state.next('loading'); // Set loading state
     
         // Map snapshot with doc ref (needed for cursor)
         return col.snapshotChanges()
@@ -141,7 +157,7 @@ export class PaginationService {
                         return transformedData;
                     });
     
-                    console.log('Transformed Values:', values);
+                    // console.log('Transformed Values:', values);
     
                     // If prepending, reverse array
                     values = this.query.prepend ? values.reverse() : values;
@@ -149,6 +165,7 @@ export class PaginationService {
                     // update source with new values, done loading
                     this._data.next(this._data.value.concat(values));
                     this._loading.next(false);
+                    this._state.next('complete'); // Set complete state
     
                     // no more values, mark done
                     if (!values.length) {
